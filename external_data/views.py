@@ -36,3 +36,35 @@ def weather_view(request):
         }
 
     return render(request, "external_data/weather.html", context)
+
+
+def posts_view(request):
+    url = "https://jsonplaceholder.typicode.com/posts"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        posts = response.json()
+
+        user_posts = [post for post in posts if post["userId"] == 1]
+
+        user_post_count = {}
+        for post in posts:
+            uid = post["userId"]
+            user_post_count[uid] = user_post_count.get(uid, 0) + 1
+
+        avg_title_length = round(sum(len(p["title"]) for p in posts) / len(posts), 2)
+
+        context = {
+            "user_posts": user_posts,
+            "user_post_count": user_post_count,
+            "avg_title_length": avg_title_length,
+            "total_posts": len(posts),
+        }
+
+    except requests.exceptions.RequestException as e:
+        context = {
+            "error": f"Błąd połączenia z API: {str(e)}"
+        }
+
+    return render(request, "external_data/posts.html", context)

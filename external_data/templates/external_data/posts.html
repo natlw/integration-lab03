@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Posty - JSONPlaceholder</title>
+</head>
+<body>
+    <h1>Statystyki postów</h1>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% else %}
+        <p>Łączna liczba postów: {{ total_posts }}</p>
+        <p>Średnia długość tytułu: {{ avg_title_length }} znaków</p>
+
+        <h2>Liczba postów na użytkownika</h2>
+        <ul>
+            {% for user_id, count in user_post_count.items %}
+                <li>Użytkownik {{ user_id }} napisał {{ count }} postów</li>
+            {% endfor %}
+        </ul>
+
+        <h2>Posty użytkownika nr 1</h2>
+        <ul>
+            {% for post in user_posts %}
+                <li><strong>{{ post.title }}</strong> — {{ post.body }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
