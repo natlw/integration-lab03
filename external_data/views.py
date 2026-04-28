@@ -1,6 +1,7 @@
 import requests
 import json
 from django.shortcuts import render
+from django.http import JsonResponse
 
 coordinates = {
     "Gdynia": ("54.52", "18.53"),
@@ -68,3 +69,30 @@ def posts_view(request):
         }
 
     return render(request, "external_data/posts.html", context)
+
+
+def weather_summary_api(request):
+    url = (f"https://api.open-meteo.com/v1/forecast"
+           f"?latitude={coordinates['Gdynia'][0]}&longitude={coordinates['Gdynia'][1]}"
+           f"&hourly=temperature_2m"
+           f"&forecast_days=1"
+           f"&timezone=Europe/Warsaw")
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+
+        temperatures = data["hourly"]["temperature_2m"][:24]
+
+        summary = {
+            "city": "Gdynia",
+            "avg_temperature": round(sum(temperatures) / len(temperatures), 2),
+            "max_temperature": max(temperatures),
+            "min_temperature": min(temperatures),
+        }
+
+        return JsonResponse(summary)
+
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({"error": str(e)}, status=500)
