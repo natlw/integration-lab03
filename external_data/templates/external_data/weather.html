@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Pogoda - {{ city }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Pogoda dla miasta {{ city }}</h1>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% else %}
+        <h2>Aktualna temperatura: {{ current_temp }}°C</h2>
+
+        <canvas id="weatherChart" width="800" height="400"></canvas>
+
+        <script>
+            const times = {{ times|safe }};
+            const temperatures = {{ temperatures|safe }};
+
+            const ctx = document.getElementById('weatherChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: times,
+                    datasets: [{
+                        label: 'Temperatura (°C)',
+                        data: temperatures,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Prognoza temperatury na 24h'
+                        }
+                    }
+                }
+            });
+        </script>
+    {% endif %}
+</body>
+</html>

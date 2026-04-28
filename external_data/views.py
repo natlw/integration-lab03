@@ -1,3 +1,38 @@
+import requests
+import json
 from django.shortcuts import render
 
-# Create your views here.
+coordinates = {
+    "Gdynia": ("54.52", "18.53"),
+    "Warszawa": ("52.237", "21.017"),
+}
+
+def weather_view(request):
+    place = "Gdynia"
+    url = (f"https://api.open-meteo.com/v1/forecast"
+           f"?latitude={coordinates[place][0]}&longitude={coordinates[place][1]}"
+           f"&current=temperature_2m,wind_speed_10m"
+           f"&hourly=temperature_2m,rain,weather_code,wind_speed_10m")
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+
+        times = data["hourly"]["time"][:24]
+        temperatures = data["hourly"]["temperature_2m"][:24]
+        current_temp = data["current"]["temperature_2m"]
+
+        context = {
+            "city": place,
+            "times": json.dumps(times),
+            "temperatures": json.dumps(temperatures),
+            "current_temp": current_temp,
+        }
+
+    except requests.exceptions.RequestException as e:
+        context = {
+            "error": f"Błąd połączenia z API: {str(e)}"
+        }
+
+    return render(request, "external_data/weather.html", context)
